@@ -5,27 +5,131 @@ Ce projet consiste à développer un shell minimaliste en C, nommé **enseash**.
 
 ---
 
-## **Fonctionnalités**
-1. **Interface utilisateur** :
-   - Affiche un message de bienvenue à l'ouverture.
-   - Propose un prompt personnalisable : `enseash % `.
-   - Permet la saisie de commandes via `stdin`.
+## 📝 **Fonctionnalités**
 
-2. **Exécution de commandes** :
-   - Les commandes sont exécutées à l'aide d'un processus enfant (fork + exec).
-   - Le parent attend la fin de l'exécution et affiche :
-     - Le code de sortie (`exit:0`) si la commande réussit.
-     - Le signal (`sign:11`) si une erreur (segmentation fault, etc.) survient.
+### ✅ **1. Affichage d'un message d'accueil et d'un prompt initial**
 
-3. **Gestion des erreurs** :
-   - Affiche un message d'erreur si la commande est introuvable.
-   - Gère la fin du shell via `Ctrl+D` ou la commande `exit`.
-   - Simule des erreurs comme des `segmentation faults` pour tester la robustesse du système.
+Lors du lancement du shell, vous verrez :
 
-4. **Mesure de performance** :
-   - Affiche le temps d'exécution de chaque commande en millisecondes.
+```bash
+$ ./enseash
+Bienvenue dans le Shell ENSEA.
+enseash %
+```
+
+- Le shell affiche un message de bienvenue.
+- Ensuite, il affiche un prompt simple `enseash %` pour saisir vos commandes.
 
 ---
+
+### ✅ **2. Exécution des commandes simples**
+
+Le shell doit exécuter une commande saisie sans arguments ou avec des arguments.
+
+#### **a) Commandes simples sans argument**
+
+Exemple :
+
+```bash
+enseash % fortune
+You will be awarded some great honor.
+enseash %
+```
+
+---
+
+### ✅ **3. Gestion de la sortie du shell avec `exit` ou `Ctrl+D`**
+
+- En tapant **`exit`**, vous quittez le shell proprement.
+  
+```bash
+enseash % exit
+Goodbye!
+```
+
+- Si vous appuyez sur **`Ctrl+D`**, cela envoie un EOF et ferme le shell.
+
+---
+
+### ✅ **4. Affichage des codes de retour ou des signaux**
+
+Chaque commande exécutée doit afficher le code de sortie ou les signaux :
+
+- Les commandes qui se terminent correctement afficheront `[exit:0]`.
+- Les commandes qui échouent avec des signaux afficheront `[sign:<n>]`.
+
+Exemple :
+
+```bash
+Welcome to the ENSEA Shell.
+enseash % ls
+' documents'   ENSEASH6     ENSEASH7.c	    ' output.txt'
+ ENSEASH5      ENSEASH6.c  ' filelist.txt'   test_memory_error
+ ENSEASH5.c    ENSEASH7    ' listfile.tx'    test_memory_error.c
+[exit:0|3ms]
+enseash % 
+```
+
+---
+
+### ✅ **5. Mesure du temps d'exécution des commandes**
+
+Chaque commande doit être chronométrée en millisecondes à l'aide de l'appel système `clock_gettime`.
+
+Exemple :
+
+```bash
+Welcome to the ENSEA Shell.
+enseash % ls
+' documents'   ENSEASH6     ENSEASH7.c	    ' output.txt'
+ ENSEASH5      ENSEASH6.c  ' filelist.txt'   test_memory_error
+ ENSEASH5.c    ENSEASH7    ' listfile.tx'    test_memory_error.c
+[exit:0|3ms]
+enseash % 
+```
+
+---
+
+### ✅ **6. Commandes complexes avec arguments**
+
+Le shell doit gérer des commandes avec des arguments complexes.
+
+Exemple :
+
+```bash
+Welcome to the ENSEA Shell.
+enseash % fortune -s
+Give your very best today.  Heaven knows it's little enough.
+[exit:0|6ms]
+enseash % 
+
+```
+
+---
+
+### ✅ **7. Gestion des redirections `stdin` et `stdout`**
+
+Le shell doit gérer les redirections avec les opérateurs `<` et `>`.
+
+#### Exemple :
+
+```bash
+Welcome to the ENSEA Shell.
+enseash %  ls > filelist.txt
+[exit:0|3ms]
+enseash % ls < filelist.txt             
+' documents'   ENSEASH6     ENSEASH7.c	    ' output.txt'
+ ENSEASH5      ENSEASH6.c  ' filelist.txt'   test_memory_error
+ ENSEASH5.c    ENSEASH7    ' listfile.tx'    test_memory_error.c
+[exit:0|2ms]
+enseash % 
+```
+
+- `>` redirige la sortie standard vers un fichier.
+- `<` redirige l'entrée standard depuis un fichier.
+
+---
+
 
 ## **Exemple d'Utilisation**
 
@@ -76,6 +180,9 @@ Goodbye!
 
 3. **Mesure du temps** :
    - Utilisation de `clock_gettime()` pour mesurer la durée d'exécution.
+  
+
+
 
 ---
 
@@ -102,7 +209,27 @@ Goodbye!
 ## **Tests et Vérification**
 
 ### **Commandes valides**
-Vérifiez que des commandes comme `ls`, `pwd`, ou `date` fonctionnent correctement.
+Vérifiez que des commandes comme `ls`, `pwd`, ou `date` fonctionnent correctement:
+Welcome to the ENSEA Shell.
+enseash % ls
+' documents'   ENSEASH6     ENSEASH7.c	    ' output.txt'
+ ENSEASH5      ENSEASH6.c  ' filelist.txt'   test_memory_error
+ ENSEASH5.c    ENSEASH7    ' listfile.tx'    test_memory_error.c
+[exit:0|3ms]
+enseash % 
+
+Welcome to the ENSEA Shell.
+enseash % pwd
+/home/ensea/Documents/TP1 
+[exit:0|2ms]
+enseash % 
+
+Welcome to the ENSEA Shell.
+enseash % date
+lundi 9 décembre 2024, 17:46:29 (UTC+0100)
+[exit:0|4ms]
+enseash % 
+
 
 ### **Erreurs simulées**
 - Commande inconnue : Affiche un message d'erreur.
@@ -120,10 +247,8 @@ Testez la gestion des codes de sortie et des signaux.
 ---
 
 ## **Améliorations possibles**
-- Support des commandes complexes avec arguments multiples.
 - Ajout de la gestion des redirections et des pipes.
 - Amélioration de la gestion des erreurs.
 
 ---
 
-Adaptez ce texte à vos besoins et remplacez "username" et "Votre Nom" par les informations appropriées. 😊
